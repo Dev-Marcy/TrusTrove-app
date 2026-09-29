@@ -113,6 +113,9 @@ func ListActiveWebhookSubscriptionsForEvent(ctx context.Context, eventType strin
 		sub.EventTypes = textArrayToSlice(eventTypesArray)
 		subs = append(subs, &sub)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("db: iterate webhook subscriptions: %w", err)
+	}
 	return subs, nil
 }
 
@@ -140,6 +143,9 @@ func ListAllWebhookSubscriptions(ctx context.Context) ([]*WebhookSubscription, e
 		}
 		sub.EventTypes = textArrayToSlice(eventTypesArray)
 		subs = append(subs, &sub)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("db: iterate all webhook subscriptions: %w", err)
 	}
 	return subs, nil
 }
@@ -235,6 +241,9 @@ func GetPendingDeliveries(ctx context.Context, limit int) ([]*WebhookDelivery, e
 			return nil, fmt.Errorf("db: scan webhook delivery: %w", err)
 		}
 		deliveries = append(deliveries, &d)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("db: iterate pending deliveries: %w", err)
 	}
 	return deliveries, nil
 }
