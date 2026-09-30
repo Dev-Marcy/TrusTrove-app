@@ -575,7 +575,7 @@ func TestHandleEventAtomicRollbackOnLogEventFailure(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			db.Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", invoiceIDHex)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", invoiceIDHex)
 		}
 	})
 
@@ -649,8 +649,8 @@ func TestHandleEventCommitsStateAndLogTogether(t *testing.T) {
 
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			db.Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", invoiceIDHex)
-			db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", invoiceIDHex)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
 		}
 	})
 

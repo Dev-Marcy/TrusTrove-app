@@ -18,20 +18,6 @@ type paginatedResponse struct {
 	TotalPages int            `json:"totalPages"`
 }
 
-// stubGetInvoicesPage replaces db.GetInvoicesPage during tests so we don't need
-// a live database connection.
-type stubDB struct {
-	invoices []*db.DbInvoice
-	total    int
-	err      error
-
-	// captured call args for assertions
-	capturedLimit  int
-	capturedOffset int
-	capturedStatus string
-	capturedIssuer string
-}
-
 // invoicesPageFunc is the signature of db.GetInvoicesPage-compatible functions
 // used by the handler via dependency injection.
 type invoicesPageFunc func(status, issuer string, limit, offset int) ([]*db.DbInvoice, int, error)

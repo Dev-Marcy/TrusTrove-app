@@ -278,7 +278,6 @@ func NewRouter(h *APIHandler) *chi.Mux {
 
 	// Global middleware
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(RecoveryMiddleware())
 	r.Use(CORSMiddleware(h.cfg.CORSAllowedOrigins))

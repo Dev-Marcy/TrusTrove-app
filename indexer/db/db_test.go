@@ -222,7 +222,7 @@ func TestLocateMigrationDir_RelativePath(t *testing.T) {
 func TestLocateMigrationDir_IndexerRelativePath(t *testing.T) {
 	// Test the second relative fallback path: indexer/db/migrations.
 	origDir, _ := os.Getwd()
-	defer func() { os.Chdir(origDir) }()
+	defer func() { _ = os.Chdir(origDir) }()
 
 	tmpDir := t.TempDir()
 	relDir := filepath.Join(tmpDir, "indexer", "db", "migrations")
