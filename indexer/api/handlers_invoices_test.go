@@ -96,7 +96,7 @@ func invoiceHandlerUnderTest(fn invoicesPageFunc) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_, _ = json.NewEncoder(w).Encode(resp)
 	}
 }
 

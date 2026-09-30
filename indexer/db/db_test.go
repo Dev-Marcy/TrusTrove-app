@@ -177,7 +177,7 @@ func TestLoadAppliedMigrations_Empty(t *testing.T) {
 func TestLocateMigrationDir_RelativePath(t *testing.T) {
 	// Save and restore working directory.
 	origDir, _ := os.Getwd()
-	defer func() { os.Chdir(origDir) }()
+	defer func() { _ = os.Chdir(origDir) }()
 
 	// Create a temporary directory tree simulating the relative path layout.
 	tmpDir := t.TempDir()
@@ -343,7 +343,7 @@ func TestRunMigration_Integration_ApplyNewMigration(t *testing.T) {
 	}
 
 	// Cleanup: drop the test table.
-	Pool.Exec(ctx, "DROP TABLE IF EXISTS _test_migration_probe")
+	_, _ = Pool.Exec(ctx, "DROP TABLE IF EXISTS _test_migration_probe")
 }
 
 // TestLocateMigrationDir_EnvVarPrecedence verifies that the env var takes

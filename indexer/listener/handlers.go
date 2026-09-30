@@ -76,6 +76,16 @@ func SyncPoolStats(ctx context.Context, cfg *config.Config, serverKP *keypair.Fu
 	return nil
 }
 
+// syncPoolStats refreshes the cached pool statistics after a state-changing
+// invoice event. A failure is logged instead of returned: the invoice event
+// itself was already indexed, so a transient chain/DB error here must not
+// cause the whole event to be retried or dropped.
+func (l *EventListener) syncPoolStats(ctx context.Context, eventName string, serverKP *keypair.Full) {
+	if err := SyncPoolStats(ctx, l.cfg, serverKP); err != nil {
+		slog.Warn("pool stats sync failed", "event", eventName, "error", err)
+	}
+}
+
 // Event-specific handlers called by the listener loop
 
 func (l *EventListener) handleInvoiceCreated(ctx context.Context, event SorobanEvent, ledgerClosedAt int64) error {
@@ -192,7 +202,7 @@ func (l *EventListener) handleInvoiceFunded(ctx context.Context, event SorobanEv
 	slog.Info("Indexed event: InvoiceFunded", "id", invoiceID, "fundedAmount", fundedAmount)
 
 	// Sync pool stats after funding invoice
-	_ = SyncPoolStats(ctx, l.cfg, serverKP)
+	l.syncPoolStats(ctx, "invoice.funded", serverKP)
 	return nil
 }
 
@@ -258,7 +268,7 @@ func (l *EventListener) handleInvoiceRepaid(ctx context.Context, event SorobanEv
 	slog.Info("Indexed event: InvoiceRepaid", "id", invoiceID)
 
 	// Sync pool stats after repayment
-	_ = SyncPoolStats(ctx, l.cfg, serverKP)
+	l.syncPoolStats(ctx, "invoice.repaid", serverKP)
 	return nil
 }
 
@@ -282,7 +292,7 @@ func (l *EventListener) handleInvoiceDefaulted(ctx context.Context, event Soroba
 	slog.Info("Indexed event: InvoiceDefaulted", "id", invoiceID)
 
 	// Sync pool stats after default
-	_ = SyncPoolStats(ctx, l.cfg, serverKP)
+	l.syncPoolStats(ctx, "invoice.defaulted", serverKP)
 	return nil
 }
 
