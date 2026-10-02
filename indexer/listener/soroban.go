@@ -71,7 +71,14 @@ type GetEventsParams struct {
 // WebhookDispatcher is the interface the listener uses to fan out events.
 // The concrete implementation lives in the webhook package.
 type WebhookDispatcher interface {
+	// Dispatch fans out an event without any transaction (pool events and
+	// other non-invoice fan-out paths). Failures are logged, not returned.
 	Dispatch(ctx context.Context, eventType string, data map[string]interface{})
+
+	// EnqueueDeliveries writes the webhook_deliveries rows for an event
+	// through q so the listener can commit them atomically with the event's
+	// state change (issue #925). It returns the first error encountered.
+	EnqueueDeliveries(ctx context.Context, q db.Querier, eventType string, data map[string]interface{}) error
 }
 
 type EventListener struct {
@@ -92,7 +99,7 @@ type EventListener struct {
 	getCheckpointFn            func(context.Context) (int32, error)
 	getLatestProcessedLedgerFn func(context.Context) (int32, error)
 	upsertCheckpointFn         func(context.Context, int32) error
-	isEventProcessedFn         func(context.Context, string) (bool, error)
+	areEventsProcessedFn       func(context.Context, []string) (map[string]bool, error)
 }
 
 const (
@@ -111,7 +118,7 @@ func NewEventListener(cfg *config.Config, health *api.ListenerHealth, dispatcher
 		getCheckpointFn:            db.GetCheckpoint,
 		getLatestProcessedLedgerFn: db.GetLatestProcessedLedger,
 		upsertCheckpointFn:         db.UpsertCheckpoint,
-		isEventProcessedFn:         db.IsEventProcessed,
+		areEventsProcessedFn:       db.AreEventsProcessed,
 	}
 }
 
@@ -261,7 +268,29 @@ func (l *EventListener) pollEvents(ctx context.Context, startLedger int32) (int3
 		if res.LatestLedger != 0 {
 			latestLedgerSeq = int32(res.LatestLedger)
 		}
+		if len(res.Events) == 0 {
+			break
+		}
+
+		// One de-duplication query per getEvents page instead of one per event.
+		// A failed lookup is fatal for this poll: `processed` would be unknown,
+		// and re-applying already-indexed events is exactly what de-duplication
+		// exists to prevent. Returning the error makes Start back off and retry
+		// the same ledger range instead of double-applying.
+		ids := make([]string, len(res.Events))
+		for i, ev := range res.Events {
+			ids[i] = ev.ID
+		}
+		processed, err := l.areEventsProcessedFn(ctx, ids)
+		if err != nil {
+			return startLedger, fmt.Errorf("check processed events (startLedger=%d, cursor=%s): %w", startLedger, cursor, err)
+		}
+
 		for _, ev := range res.Events {
+			if processed[ev.ID] {
+				continue
+			}
+
 			sorobanEv := SorobanEvent{
 				ID:             ev.ID,
 				ContractID:     ev.ContractID,
@@ -271,20 +300,13 @@ func (l *EventListener) pollEvents(ctx context.Context, startLedger int32) (int3
 				Value:          ev.Value.Xdr,
 			}
 
-			processed, err := l.isEventProcessedFn(ctx, sorobanEv.ID)
-			if err != nil {
-				slog.Error("Failed to check if event is processed", "eventId", sorobanEv.ID, "error", err)
-			}
-			if processed {
-				continue
-			}
-
-			err = l.handleEvent(ctx, sorobanEv)
-			if err != nil {
+			// Once an event has entered processing, cancellation only stops new
+			// polls; the transaction and webhook enqueue may finish atomically.
+			if err := l.handleEvent(context.WithoutCancel(ctx), sorobanEv); err != nil {
 				return startLedger, fmt.Errorf("handle event %s: %w", sorobanEv.ID, err)
 			}
 		}
-		if res.Cursor != "" && len(res.Events) > 0 {
+		if res.Cursor != "" {
 			cursor = res.Cursor
 		} else {
 			break
