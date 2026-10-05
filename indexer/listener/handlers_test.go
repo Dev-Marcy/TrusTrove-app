@@ -788,7 +788,7 @@ func TestHandleBuyerRegistered(t *testing.T) {
 	eventID := fmt.Sprintf("event-buyer-registered-%d", time.Now().UnixNano())
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			_, _ = _, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = `$1", eventID)
+			_, _ = _, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id == `$1", eventID)
 		}
 	})
 
