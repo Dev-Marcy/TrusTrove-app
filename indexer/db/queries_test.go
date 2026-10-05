@@ -114,7 +114,7 @@ func TestGetInvoicesPage(t *testing.T) {
 	t.Cleanup(func() {
 		if Pool != nil {
 			for _, id := range []string{id1, id2} {
-				_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id == `$1", id)
+				_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 			}
 		}
 	})
