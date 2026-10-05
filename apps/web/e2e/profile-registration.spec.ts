@@ -1,21 +1,23 @@
 import { expect } from "@playwright/test";
 import { test } from "./fixtures/freighter";
 
-const MOCK_ADDRESS = "GBMOCKWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-
 test.describe("Profile Registration & Verification - Happy Path", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the profile page
     await page.goto("/profile");
 
     // Connect Freighter wallet if not already connected
-    const connectBtn = page.getByRole("button", { name: /Connect Wallet/i });
+    const connectBtn = page
+      .getByRole("navigation")
+      .getByRole("button", { name: /Connect Wallet/i });
     if (await connectBtn.isVisible()) {
       await connectBtn.click();
     }
 
     // Wait for wallet connection to be reflected in the UI
-    await expect(page.getByText(MOCK_ADDRESS)).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.getByRole("navigation").getByText("GBMOCK...XXXX", { exact: true }),
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("should show unverified state and open the registration modal", async ({
