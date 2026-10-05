@@ -103,7 +103,8 @@ func TestHealthEndpoint_Returns200WhenListenerAndDBAreHealthy(t *testing.T) {
 	h.listenerHealth = NewListenerHealth()
 	h.listenerHealth.MarkStarted()
 
-	router := NewRouter(h)
+	router, stopRouter := NewRouter(h)
+	t.Cleanup(stopRouter)
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rr := httptest.NewRecorder()
 
@@ -120,7 +121,8 @@ func TestHealthEndpoint_Returns200WhenListenerAndDBAreHealthy(t *testing.T) {
 func TestMetricsEndpoint_RequiresConfiguredToken(t *testing.T) {
 	h := newTestHandler(t)
 	h.cfg.MetricsToken = "metrics-secret"
-	router := NewRouter(h)
+	router, stopRouter := NewRouter(h)
+	t.Cleanup(stopRouter)
 
 	for _, authorization := range []string{"", "Bearer wrong"} {
 		req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
@@ -144,7 +146,8 @@ func TestMetricsEndpoint_RequiresConfiguredToken(t *testing.T) {
 func TestMetricsEndpoint_RemainsPublicForLocalDevelopment(t *testing.T) {
 	h := newTestHandler(t)
 	h.cfg.MetricsToken = ""
-	router := NewRouter(h)
+	router, stopRouter := NewRouter(h)
+	t.Cleanup(stopRouter)
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/metrics", nil))
 	if rr.Code != http.StatusOK {
@@ -158,7 +161,8 @@ func TestHealthEndpoint_Returns503WhenListenerStops(t *testing.T) {
 	h.listenerHealth = NewListenerHealth()
 	h.listenerHealth.MarkStopped()
 
-	router := NewRouter(h)
+	router, stopRouter := NewRouter(h)
+	t.Cleanup(stopRouter)
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rr := httptest.NewRecorder()
 
@@ -436,7 +440,8 @@ func TestRouter_PublicReadRoutesAreRateLimited(t *testing.T) {
 	h.getPoolStatsFn = func(context.Context) (*db.DbPoolStats, error) {
 		return &db.DbPoolStats{}, nil
 	}
-	router := NewRouter(h)
+	router, stopRouter := NewRouter(h)
+	t.Cleanup(stopRouter)
 
 	const maxRequests = 6
 	allowed, limited := 0, 0
@@ -460,5 +465,34 @@ func TestRouter_PublicReadRoutesAreRateLimited(t *testing.T) {
 	}
 	if limited == 0 {
 		t.Fatalf("expected status %d once the client exceeded the configured RPS", http.StatusTooManyRequests)
+	}
+}
+
+func TestRouter_InvoiceCreationRateLimitBlocksSixthRequest(t *testing.T) {
+	h := newTestHandler(t)
+	h.cfg.RateLimitRPS = 100
+	h.cfg.InvoiceRateLimit = 5
+	h.cfg.InvoiceRateLimitWindow = time.Hour
+	router, stopRouter := NewRouter(h)
+	t.Cleanup(stopRouter)
+
+	token := createTestJWT(h.cfg.JWTSecret, "GCLIENT919")
+	for i := 1; i <= 6; i++ {
+		req := httptest.NewRequest(http.MethodPost, "/invoices", strings.NewReader(`{}`))
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		if i < 6 && rr.Code == http.StatusTooManyRequests {
+			t.Fatalf("request %d was rate limited before the configured limit", i)
+		}
+		if i == 6 {
+			if rr.Code != http.StatusTooManyRequests {
+				t.Fatalf("sixth request status=%d, want %d; body=%s", rr.Code, http.StatusTooManyRequests, rr.Body.String())
+			}
+			if rr.Header().Get("Retry-After") == "" {
+				t.Fatal("sixth request did not include Retry-After")
+			}
+		}
 	}
 }
