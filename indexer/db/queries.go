@@ -197,7 +197,7 @@ func GetInvoicesPage(ctx context.Context, status, issuer string, limit, offset i
 			funded_at, shipped_at, issuer_confirmed, buyer_confirmed, buyer_confirmed_at, repaid_at,
 			attestation_agent_id, risk_score_bps, evidence_hash, attested_at
 		FROM invoices%s
-		ORDER BY created_at DESC
+		ORDER BY created_at DESC, id DESC
 		LIMIT $%d OFFSET $%d
 	`, whereClause, limitPlaceholder, offsetPlaceholder)
 	queryArgs := append(append([]any{}, filterArgs...), limit, offset)
@@ -504,7 +504,7 @@ func GetRecentEvents(ctx context.Context, limit int) ([]*EventLog, error) {
 	query := `
 		SELECT id, event_id, contract_id, ledger, ledger_closed_at, event_type, data
 		FROM events_log
-		ORDER BY ledger_closed_at DESC
+		ORDER BY ledger_closed_at DESC, id DESC
 		LIMIT $1
 	`
 	rows, err := Pool.Query(ctx, query, limit)
@@ -523,7 +523,7 @@ func GetRecentEvents(ctx context.Context, limit int) ([]*EventLog, error) {
 		events = append(events, &ev)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("queries: iterate recent events: %w", err)
+		return nil, fmt.Errorf("queries: iterate events: %w", err)
 	}
 	return events, nil
 }
