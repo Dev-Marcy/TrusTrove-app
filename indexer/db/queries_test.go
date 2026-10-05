@@ -52,7 +52,7 @@ func TestInsertAndGetInvoice(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -114,7 +114,7 @@ func TestGetInvoicesPage(t *testing.T) {
 	t.Cleanup(func() {
 		if Pool != nil {
 			for _, id := range []string{id1, id2} {
-				_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+				_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 			}
 		}
 	})
@@ -323,7 +323,7 @@ func TestUpdateInvoiceListed(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -353,7 +353,7 @@ func TestUpdateInvoiceFunded(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -387,7 +387,7 @@ func TestUpdateInvoiceShipped(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -421,7 +421,7 @@ func TestUpdateInvoiceDeliveryConfirmed(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -455,7 +455,7 @@ func TestUpdateInvoiceRepaid(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -486,7 +486,7 @@ func TestUpdateInvoiceStatus(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
@@ -691,7 +691,7 @@ func TestUpdateInvoiceAttestation(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
 		}
 	})
 
