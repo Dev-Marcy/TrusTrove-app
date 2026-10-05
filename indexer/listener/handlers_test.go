@@ -304,7 +304,7 @@ func TestHandlePoolDepositLoggedAndDispatched(t *testing.T) {
 	eventID := fmt.Sprintf("event-pool-deposit-%d", time.Now().UnixNano())
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
 		}
 	})
 
@@ -369,7 +369,7 @@ func TestHandlePoolWithdrawalLoggedAndDispatched(t *testing.T) {
 	eventID := fmt.Sprintf("event-pool-withdraw-%d", time.Now().UnixNano())
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
 		}
 	})
 

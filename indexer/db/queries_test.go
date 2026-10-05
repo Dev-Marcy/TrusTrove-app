@@ -52,7 +52,7 @@ func TestInsertAndGetInvoice(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			_, _ = _, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = `$1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -749,7 +749,7 @@ func TestInvoiceCheckConstraints(t *testing.T) {
 	}
 	t.Cleanup(func() {
 		if Pool != nil {
-			Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
+			_, _ = Pool.Exec(ctx, "DELETE FROM invoices WHERE id = $1", id)
 		}
 	})
 
@@ -783,7 +783,8 @@ func TestPoolSnapshotsConstraints(t *testing.T) {
 
 	ctx := context.Background()
 	if _, err := Pool.Exec(ctx, `INSERT INTO pool_snapshots (id) VALUES (2)`); err == nil {
-		Pool.Exec(ctx, `DELETE FROM pool_snapshots WHERE id = 2`)
+		if Pool != nil {
+    _, _ = Pool.Exec(ctx, "DELETE FROM pool_snapshots WHERE id = 2")}
 		t.Error("second pool_snapshots row: expected constraint violation, got nil error")
 	}
 	if _, err := Pool.Exec(ctx, `UPDATE pool_snapshots SET utilization_rate_bps = 10001 WHERE id = 1`); err == nil {
