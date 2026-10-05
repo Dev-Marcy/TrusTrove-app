@@ -196,11 +196,6 @@ func InvoiceRateLimitMiddleware(rl *InvoiceRateLimiter) func(http.Handler) http.
 			remaining, resetAt := rl.RemainingAttempts(clientAddr)
 
 			// Set informational headers on every response (including allowed ones).
-			retryAfter := int(time.Until(resetAt).Seconds())
-			if retryAfter < 0 {
-				retryAfter = 0
-			}
-
 			w.Header().Set("X-RateLimit-Limit", itoa(rl.limit))
 			w.Header().Set("X-RateLimit-Reset", itoa(int(resetAt.Unix())))
 
