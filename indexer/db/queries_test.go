@@ -14,7 +14,7 @@ import (
 func skipIfNoDB(t *testing.T) {
 	t.Helper()
 	if os.Getenv("TEST_DATABASE_URL") == "" {
-		t.Skip("TEST_DATABASE_URL not set — skipping DB integration test")
+		t.Skip("TEST_DATABASE_URL not set â€” skipping DB integration test")
 	}
 }
 

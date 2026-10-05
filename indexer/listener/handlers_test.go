@@ -23,7 +23,7 @@ import (
 func skipIfNoDB(t *testing.T) {
 	t.Helper()
 	if os.Getenv("TEST_DATABASE_URL") == "" {
-		t.Skip("TEST_DATABASE_URL not set — skipping DB integration test")
+		t.Skip("TEST_DATABASE_URL not set â€” skipping DB integration test")
 	}
 }
 
@@ -249,7 +249,7 @@ func TestHandlePoolYieldDistributedParsesAmounts(t *testing.T) {
 	l := newTestListener()
 
 	// receive_repayment publishes (amount, lp_yield, protocol_cut); the third
-	// element must be ignored — the envelope has no field for it.
+	// element must be ignored â€” the envelope has no field for it.
 	amountParts := xdr.UInt128Parts{Hi: 0, Lo: xdr.Uint64(1_050_000_000)}
 	yieldParts := xdr.UInt128Parts{Hi: 0, Lo: xdr.Uint64(35_000_000)}
 	cutParts := xdr.UInt128Parts{Hi: 0, Lo: xdr.Uint64(5_000_000)}
@@ -319,7 +319,7 @@ func TestHandlePoolDepositLoggedAndDispatched(t *testing.T) {
 		t.Fatalf("IsEventProcessed: %v", err)
 	}
 	if !processed {
-		t.Fatal("pool deposit was not persisted to events_log — expected it to be handled, not skipped")
+		t.Fatal("pool deposit was not persisted to events_log â€” expected it to be handled, not skipped")
 	}
 
 	// 2. Dispatched: exactly one fan-out carrying the LP payload.
@@ -393,7 +393,7 @@ func TestHandlePoolWithdrawalLoggedAndDispatched(t *testing.T) {
 		t.Fatalf("IsEventProcessed: %v", err)
 	}
 	if !processed {
-		t.Fatal("pool withdrawal was not persisted to events_log — expected it to be handled, not skipped")
+		t.Fatal("pool withdrawal was not persisted to events_log â€” expected it to be handled, not skipped")
 	}
 
 	if rec.calls != 1 {
@@ -747,7 +747,7 @@ func TestHandleIssuerRegistered(t *testing.T) {
 	eventID := fmt.Sprintf("event-issuer-registered-%d", time.Now().UnixNano())
 	t.Cleanup(func() {
 		if db.Pool != nil {
-			_, _ = _, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = `$1", eventID)
+			_, _ = db.Pool.Exec(ctx, "DELETE FROM events_log WHERE event_id = $1", eventID)
 		}
 	})
 
@@ -772,7 +772,7 @@ func TestHandleIssuerRegistered(t *testing.T) {
 		t.Fatalf("IsEventProcessed: %v", err)
 	}
 	if !processed {
-		t.Fatal("issuer_registered event was skipped — expected it to be persisted in events_log")
+		t.Fatal("issuer_registered event was skipped â€” expected it to be persisted in events_log")
 	}
 }
 
@@ -813,7 +813,7 @@ func TestHandleBuyerRegistered(t *testing.T) {
 		t.Fatalf("IsEventProcessed: %v", err)
 	}
 	if !processed {
-		t.Fatal("buyer_registered event was skipped — expected it to be persisted in events_log")
+		t.Fatal("buyer_registered event was skipped â€” expected it to be persisted in events_log")
 	}
 }
 
@@ -840,7 +840,7 @@ func TestHandleRegistrationEvent_ShortTopic(t *testing.T) {
 // TestHandleEventAtomicRollbackOnLogEventFailure covers issue #925's acceptance
 // criterion: a failure after the invoice state change must leave neither the
 // invoice update nor the events_log row behind. The forced failure is a real
-// database error on the events_log insert — events_log.event_id is
+// database error on the events_log insert â€” events_log.event_id is
 // VARCHAR(128), so an over-length event id makes that statement fail after the
 // UPDATE invoices statement in the same transaction has already succeeded.
 func TestHandleEventAtomicRollbackOnLogEventFailure(t *testing.T) {
