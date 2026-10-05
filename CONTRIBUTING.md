@@ -30,7 +30,7 @@ Before opening or requesting review of a pull request, confirm the following:
 
 ## Test command coverage
 
-`pnpm build` covers `@trusttrove/sdk`, `@trusttrove/sdk-react`, `@trusttrove/cli`, and `web`. `pnpm test` covers SDK, SDK React, and web Vitest suites; it does not run CLI or Go tests. `pnpm lint` covers web only, while `pnpm typecheck` checks every TypeScript workspace.
+`pnpm build` covers `@trusttrove/sdk`, `@trusttrove/sdk-react`, `@trusttrove/cli`, and `web`. `pnpm test` runs the Vitest suites for those four packages; it does not run Go tests. `pnpm lint` covers SDK and web, while `pnpm typecheck` builds SDK, SDK React, and CLI before checking TypeScript across the workspaces.
 
 Vitest reports `Test Files` and `Tests` (the counts vary by package and checkout). For example:
 
@@ -82,7 +82,7 @@ Follow Conventional Commits format:
 Verify compilation across all monorepo packages before submitting code:
 
 ```bash
-# Compile SDK and Next.js frontend
+# Build all TypeScript workspace packages
 pnpm install
 pnpm build
 
@@ -103,11 +103,10 @@ This runs `tsc --noEmit` recursively over every TypeScript package in the monore
 
 ### 3. Linting & Code Quality
 
-Run linters on edited workspace directories:
+The root `pnpm lint` command lints the SDK and web workspaces. Run Go vet separately:
 
 ```bash
-# Web application lint
-pnpm --filter web lint
+pnpm lint
 
 # Go linter
 cd indexer
@@ -118,7 +117,7 @@ go vet ./...
 
 The test suite is split across two runtimes. Both must pass before opening a PR.
 
-**TypeScript tests** (SDK + web, run from the repo root):
+**TypeScript tests** (SDK, SDK React, CLI, and web, run from the repo root):
 
 ```bash
 # Run all TypeScript workspace tests
@@ -131,7 +130,7 @@ pnpm --filter web test
 pnpm --filter @trusttrove/sdk test
 ```
 
-> **Note:** `pnpm test` runs the `@trusttrove/sdk`, `@trusttrove/sdk-react`, and web Vitest suites. It does **not** run CLI or Go tests.
+> **Note:** `pnpm test` runs the `@trusttrove/sdk`, `@trusttrove/sdk-react`, `@trusttrove/cli`, and web Vitest suites. It does **not** run Go tests.
 
 **Go tests** (indexer, run from the `indexer/` directory):
 

@@ -23,4 +23,4 @@ Run `docker-compose up` to start the one-command stack.
 - `examples` — integration examples
 - `docs` — developer and operational documentation
 
-Root command coverage: `pnpm build` builds SDK, SDK React, CLI, and web; `pnpm test` runs SDK, SDK React, and web Vitest suites; `pnpm lint` covers web only; and `pnpm typecheck` checks all TypeScript workspaces. Run `go build -v .`, `go vet ./...`, and `go test ./...` separately from `indexer`.
+Root command coverage: `pnpm build` builds SDK, SDK React, CLI, and web; `pnpm test` runs Vitest suites for those four packages; `pnpm lint` runs SDK and web lint; and `pnpm typecheck` builds SDK, SDK React, and CLI before checking TypeScript across the workspaces. Run `go build -v .`, `go vet ./...`, and `go test ./...` separately from `indexer`.
