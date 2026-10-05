@@ -784,7 +784,8 @@ func TestPoolSnapshotsConstraints(t *testing.T) {
 	ctx := context.Background()
 	if _, err := Pool.Exec(ctx, `INSERT INTO pool_snapshots (id) VALUES (2)`); err == nil {
 		if Pool != nil {
-    _, _ = Pool.Exec(ctx, "DELETE FROM pool_snapshots WHERE id = 2")}
+			_, _ = Pool.Exec(ctx, "DELETE FROM pool_snapshots WHERE id = 2")
+		}
 		t.Error("second pool_snapshots row: expected constraint violation, got nil error")
 	}
 	if _, err := Pool.Exec(ctx, `UPDATE pool_snapshots SET utilization_rate_bps = 10001 WHERE id = 1`); err == nil {
