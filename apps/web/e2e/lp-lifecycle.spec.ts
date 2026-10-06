@@ -7,17 +7,14 @@ test.describe("LP Lifecycle - Pool Deposit & Redeem", () => {
     await page.goto("/lp");
 
     // Connect Freighter wallet if not already connected
-    // Scoped to the Navbar: the page body renders its own connect button too.
-    const connectBtn = page
-      .getByRole("navigation")
-      .getByRole("button", { name: /Connect Wallet/i });
+    const connectBtn = page.getByRole("button", { name: /Connect Wallet/i });
     if (await connectBtn.isVisible()) {
       await connectBtn.click();
     }
 
     // Wait for wallet connection to be reflected in the UI
     await expect(
-      page.getByRole("navigation").getByText("GBMOCK...XXXX", { exact: true }),
+      page.getByText("GBMOCKWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
     ).toBeVisible({ timeout: 15000 });
   });
 
@@ -182,16 +179,14 @@ test.describe("LP Lifecycle - Secondary Flows", () => {
     await page.goto("/lp");
 
     // Connect wallet
-    const connectBtn = page
-      .getByRole("navigation")
-      .getByRole("button", { name: /Connect Wallet/i });
+    const connectBtn = page.getByRole("button", { name: /Connect Wallet/i });
     if (await connectBtn.isVisible()) {
       await connectBtn.click();
     }
 
     // Wait for connection
     await expect(
-      page.getByRole("navigation").getByText("GBMOCK...XXXX", { exact: true }),
+      page.getByText("GBMOCKWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
     ).toBeVisible({ timeout: 15000 });
 
     // Disconnect wallet (the Navbar or WalletConnect should have a disconnect button)
@@ -202,9 +197,7 @@ test.describe("LP Lifecycle - Secondary Flows", () => {
 
     // After disconnection, the Connect Wallet button should reappear
     await expect(
-      page
-        .getByRole("navigation")
-        .getByRole("button", { name: /Connect Wallet/i }),
+      page.getByRole("button", { name: /Connect Wallet/i }),
     ).toBeVisible({ timeout: 10000 });
   });
 

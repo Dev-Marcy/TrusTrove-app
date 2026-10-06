@@ -242,17 +242,14 @@ async function setupIssuerApiMocks(page: Page) {
 async function connectAsIssuer(page: Page) {
   await page.goto("/dashboard");
 
-  // Scoped to the Navbar: the page body renders its own connect button too.
-  const connectBtn = page
-    .getByRole("navigation")
-    .getByRole("button", { name: /Connect Wallet/i });
+  const connectBtn = page.getByRole("button", { name: /Connect Wallet/i });
   if (await connectBtn.isVisible()) {
     await connectBtn.click();
   }
 
-  await expect(
-    page.getByRole("navigation").getByText("GBMOCK...XXXX", { exact: true }),
-  ).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/GBMOCK\.\.\.XXXX/i)).toBeVisible({
+    timeout: 15000,
+  });
   await expect(
     page.getByRole("heading", { name: /SME Financing Dashboard/i }),
   ).toBeVisible();
@@ -358,15 +355,10 @@ test.describe("SME Issuer Flow - Secondary Flows", () => {
     await setupIssuerApiMocks(page);
     await connectAsIssuer(page);
 
-    await page
-      .getByRole("navigation")
-      .getByRole("button", { name: /Disconnect wallet/i })
-      .click();
+    await page.getByRole("button", { name: /Disconnect wallet/i }).click();
 
     await expect(
-      page
-        .getByRole("navigation")
-        .getByRole("button", { name: /Connect Wallet/i }),
+      page.getByRole("button", { name: /Connect Wallet/i }),
     ).toBeVisible({ timeout: 10000 });
   });
 
